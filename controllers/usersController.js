@@ -51,3 +51,37 @@ exports.users_post = function (req, res, next) {
       });
   });
 };
+
+// Login user
+exports.users_login_post = function (req, res, next) {
+  User.findOne({ username: req.body.username }).exec((err, user) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, msg: "Username not found" });
+    } else {
+      bcrypt.compare(req.body.password, user.hash, (err, result) => {
+        if (err) {
+          return next(err);
+        }
+        if (!result) {
+          return res
+            .status(401)
+            .json({ success: false, msg: "Invalid password" });
+        } else {
+          // successful authentication, we issue the JWT
+          const jwt = issueJWT(user);
+          return res.status(200).json({
+            success: true,
+            user: user,
+            token: jwt.token,
+            expiresIn: jwt.expires,
+          });
+        }
+      });
+    }
+  });
+};
