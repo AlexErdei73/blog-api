@@ -23,6 +23,18 @@ function issueJWT(user) {
   };
 }
 
+// Respond with the list of existing users
+exports.users_get = function (req, res, next) {
+  User.find({})
+    .select("-hash")
+    .exec((err, users) => {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).json(users);
+    });
+};
+
 // Create new user in the database
 exports.users_post = function (req, res, next) {
   User.findOne({ username: req.body.username }, (err, user) => {
@@ -31,7 +43,7 @@ exports.users_post = function (req, res, next) {
     }
     if (user) {
       const err = new Error("Username already used");
-      return res.status(409).json({ success: false, msg: err.message });
+      res.status(409).json({ success: false, msg: err.message });
     } else
       bcrypt.hash(req.body.password, 10, (err, hash) => {
         if (err) {
@@ -46,7 +58,7 @@ exports.users_post = function (req, res, next) {
           if (err) {
             return next(err);
           }
-          return res.status(200).json({ success: true, user: user });
+          res.status(200).json({ success: true, user: user });
         });
       });
   });
@@ -59,22 +71,18 @@ exports.users_login_post = function (req, res, next) {
       return next(err);
     }
     if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, msg: "Username not found" });
+      res.status(401).json({ success: false, msg: "Username not found" });
     } else {
       bcrypt.compare(req.body.password, user.hash, (err, result) => {
         if (err) {
           return next(err);
         }
         if (!result) {
-          return res
-            .status(401)
-            .json({ success: false, msg: "Invalid password" });
+          res.status(401).json({ success: false, msg: "Invalid password" });
         } else {
           // successful authentication, we issue the JWT
           const jwt = issueJWT(user);
-          return res.status(200).json({
+          res.status(200).json({
             success: true,
             user: user,
             token: jwt.token,
