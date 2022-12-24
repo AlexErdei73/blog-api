@@ -4,6 +4,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var passport = require("passport");
 var configAuth = require("./config/auth");
+require("./config/database");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
