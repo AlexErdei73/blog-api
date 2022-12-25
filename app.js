@@ -7,7 +7,7 @@ var configAuth = require("./config/auth");
 require("./config/database");
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+var usersRouter = require("./routes/users")(passport); //We inject passport to the router module to protect some routes
 
 var app = express();
 

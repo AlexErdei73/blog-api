@@ -11,4 +11,13 @@ router.post("/", usersController.users_post);
 /* POST users/login to validate user and get JWT */
 router.post("/login", usersController.users_login_post);
 
-module.exports = router;
+module.exports = (passport) => {
+  /* PUT users/:id to update the authenticated user */
+  router.put(
+    "/:id",
+    passport.authenticate("jwt", { session: false }),
+    usersController.users_id_put
+  );
+
+  return router;
+};

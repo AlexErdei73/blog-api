@@ -93,3 +93,33 @@ exports.users_login_post = function (req, res, next) {
     }
   });
 };
+
+//Update authenticated user
+exports.users_id_put = function (req, res, next) {
+  const _id = req.params.id;
+  if (_id !== req.user._id.valueOf()) {
+    //User trying to update someone else' record
+    res.status(403).json({
+      success: false,
+      msg: "You are not allowed to update other user in the database",
+    });
+    return;
+  }
+  User.findByIdAndUpdate(
+    _id,
+    {
+      _id: _id,
+      username: req.body.username,
+      bio: req.body.bio,
+    },
+    {},
+    (err, user) => {
+      if (err) {
+        return next(err);
+      }
+      res
+        .status(200)
+        .json({ success: true, msg: "User has been updated", user: user });
+    }
+  );
+};
