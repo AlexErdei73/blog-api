@@ -8,6 +8,8 @@ const UserSchema = new Schema({
   },
   hash: String,
   isAdmin: Boolean,
+  name: String,
+  jobTitle: String,
   bio: String,
 });
 

@@ -53,6 +53,9 @@ exports.users_post = function (req, res, next) {
           username: req.body.username,
           hash: hash,
           isAdmin: false,
+          name: req.body.name,
+          jobTitle: req.body.jobTitle,
+          bio: req.body.bio,
         });
         newUser.save((err, user) => {
           if (err) {
@@ -110,6 +113,8 @@ exports.users_id_put = function (req, res, next) {
     {
       _id: _id,
       username: req.body.username,
+      name: req.body.name,
+      jobTitle: req.body.jobTitle,
       bio: req.body.bio,
     },
     {},
