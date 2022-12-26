@@ -19,5 +19,12 @@ module.exports = (passport) => {
     usersController.users_id_put
   );
 
+  /* DELETE users/:id to delete user by admin*/
+  router.delete(
+    "/:id",
+    passport.authenticate("jwt", { session: false }),
+    usersController.users_id_delete
+  );
+
   return router;
 };

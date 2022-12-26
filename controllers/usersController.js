@@ -60,7 +60,6 @@ exports.users_post = [
     .custom((value) => value.indexOf("'") === -1)
     .withMessage("Bio cannot contain apostrophe")
     .escape(),
-  ,
   function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -154,7 +153,6 @@ exports.users_id_put = [
     .custom((value) => value.indexOf("'") === -1)
     .withMessage("Bio cannot contain apostrophe")
     .escape(),
-  ,
   function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -193,3 +191,19 @@ exports.users_id_put = [
     );
   },
 ];
+
+//Delete userby admin
+exports.users_id_delete = function (req, res, next) {
+  if (!req.user.isAdmin) {
+    res
+      .status(403)
+      .json({ success: false, msg: "You are not allowed to delete users" });
+    return;
+  }
+  User.findByIdAndRemove(req.params.id, {}, (err, user) => {
+    if (err) {
+      return next(err);
+    }
+    res.status(200).json({ success: true, msg: "User is removed", user: user });
+  });
+};
