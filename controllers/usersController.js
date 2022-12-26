@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 require("dotenv").config();
 const jsonwebtoken = require("jsonwebtoken");
 const User = require("../models/user");
+const { body, validationResult } = require("express-validator");
 
 function issueJWT(user) {
   const _id = user._id;
@@ -36,36 +37,68 @@ exports.users_get = function (req, res, next) {
 };
 
 // Create new user in the database
-exports.users_post = function (req, res, next) {
-  User.findOne({ username: req.body.username }, (err, user) => {
-    if (err) {
-      return next(err);
+exports.users_post = [
+  body("username")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Username is required")
+    .isAlphanumeric()
+    .withMessage("Username can contain oly alphanumeric characters"),
+  body("name")
+    .trim()
+    .optional({ checkFalsy: true })
+    .isAlphanumeric()
+    .withMessage("Name can only contain alphanumeric characters"),
+  body("jobTitle")
+    .trim()
+    .optional({ checkFalsy: true })
+    .isAlphanumeric()
+    .withMessage("Job title can only contain alphanumeric characters"),
+  body("bio")
+    .trim()
+    .optional({ checkFalsy: true })
+    .custom((value) => value.indexOf("'") === -1)
+    .withMessage("Bio cannot contain apostrophe")
+    .escape(),
+  ,
+  function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res
+        .status(400)
+        .json({ success: false, errors: errors.array(), user: req.body.user });
+      return;
     }
-    if (user) {
-      const err = new Error("Username already used");
-      res.status(409).json({ success: false, msg: err.message });
-    } else
-      bcrypt.hash(req.body.password, 10, (err, hash) => {
-        if (err) {
-          return next(err);
-        }
-        const newUser = new User({
-          username: req.body.username,
-          hash: hash,
-          isAdmin: false,
-          name: req.body.name,
-          jobTitle: req.body.jobTitle,
-          bio: req.body.bio,
-        });
-        newUser.save((err, user) => {
+    User.findOne({ username: req.body.username }, (err, user) => {
+      if (err) {
+        return next(err);
+      }
+      if (user) {
+        const err = new Error("Username already used");
+        res.status(409).json({ success: false, msg: err.message });
+      } else
+        bcrypt.hash(req.body.password, 10, (err, hash) => {
           if (err) {
             return next(err);
           }
-          res.status(200).json({ success: true, user: user });
+          const newUser = new User({
+            username: req.body.username,
+            hash: hash,
+            isAdmin: false,
+            name: req.body.name,
+            jobTitle: req.body.jobTitle,
+            bio: req.body.bio,
+          });
+          newUser.save((err, user) => {
+            if (err) {
+              return next(err);
+            }
+            res.status(200).json({ success: true, user: user });
+          });
         });
-      });
-  });
-};
+    });
+  },
+];
 
 // Login user
 exports.users_login_post = function (req, res, next) {
