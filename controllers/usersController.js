@@ -194,6 +194,7 @@ exports.users_id_put = [
 
 //Delete userby admin
 exports.users_id_delete = function (req, res, next) {
+  console.log(req.user);
   if (!req.user.isAdmin) {
     res
       .status(403)
