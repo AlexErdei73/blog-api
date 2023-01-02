@@ -2,7 +2,14 @@ const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
 
 exports.posts_get = function (req, res, next) {
-  res.send("NOT IMPLEMENTED");
+  Post.find({})
+    //.populate(["content", "comments", "likes"])
+    .exec((err, posts) => {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).json({ success: true, posts });
+    });
 };
 
 exports.posts_post = [
