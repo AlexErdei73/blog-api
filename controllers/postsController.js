@@ -53,7 +53,15 @@ exports.posts_post = [
 ];
 
 exports.post_get = function (req, res, next) {
-  res.send("NOT IMPLEMENTED");
+  Post.findOne({ _id: req.params.id })
+    .populate("author")
+    //.populate(["content", "comments", "likes"])
+    .exec((err, post) => {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).json({ success: true, post });
+    });
 };
 
 exports.post_put = [
