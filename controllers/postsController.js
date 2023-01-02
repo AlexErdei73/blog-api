@@ -50,13 +50,63 @@ exports.post_get = function (req, res, next) {
 };
 
 exports.post_put = [
-  // TODO validation and sanitization
+  body("title")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("Post needs a title")
+    .isAlphanumeric("en-US", { ignore: " " })
+    .withMessage("Title can only contain alphanumeric characters"),
   function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       // Handle validation errors
+      res.status(400).json({
+        success: false,
+        user: req.user,
+        errors: errors.array(),
+        post: {
+          title: req.body.title,
+          author: req.user._id,
+          published: false,
+        },
+      });
+      return;
     }
-    res.send("NOT IMPLEMETED");
+    Post.findById(req.params.id, {}, {}, (err, post) => {
+      if (err) {
+        return next(err);
+      }
+      if (post.author.valueOf() !== req.user._id.valueOf()) {
+        // User tries to update someone else's post
+        const error = {
+          msg: "The post, you are trying to update, is not yours",
+        };
+        res
+          .status(403)
+          .json({ success: false, user: req.user, errors: [error], post });
+        return;
+      }
+      Post.findByIdAndUpdate(
+        req.params.id,
+        {
+          _id: req.params.id,
+          title: req.body.title,
+          content: req.body.content || [],
+          comments: req.body.comments || [],
+          likes: req.body.likes || [],
+          published: req.body.published || false,
+        },
+        {},
+        (err, post) => {
+          if (err) {
+            return next(err);
+          }
+          res
+            .status(200)
+            .json({ success: true, user: req.user, errors: [], post });
+        }
+      );
+    });
   },
 ];
 
