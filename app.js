@@ -9,6 +9,7 @@ require("./config/database");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users")(passport); //We inject passport to the router module to protect some routes
 var postsRouter = require("./routes/posts")(passport);
+var blocksRouter = require("./routes/blocks")(passport);
 
 var app = express();
 
@@ -24,5 +25,6 @@ app.use(passport.initialize());
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
+app.use("/posts/:id/blocks", blocksRouter);
 
 module.exports = app;
