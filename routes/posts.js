@@ -8,6 +8,9 @@ router.get("/", postsController.posts_get);
 /* GET posts/:id to get the existing post */
 router.get("/:id", postsController.post_get);
 
+/* GET posts/:id/blocks to get the content of the post */
+router.get("/:id/blocks", postsController.blocks_get);
+
 module.exports = (passport) => {
   /* POST posts to add new post to database */
   router.post(
