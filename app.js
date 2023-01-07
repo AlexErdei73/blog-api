@@ -25,5 +25,6 @@ app.use(passport.initialize());
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
+app.use("/posts/:id/blocks", blocksRouter);
 
 module.exports = app;
