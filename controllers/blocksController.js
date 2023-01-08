@@ -1,4 +1,5 @@
 const Block = require("../models/block");
+const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
 
 exports.blocks_post = [
@@ -34,14 +35,60 @@ exports.blocks_post = [
 			type: req.body.type,
 			text: req.body.text,
 		});
-		newBlock.save((err, block) => {
+		newBlock.save((err) => {
 			if (err) {
 				return next(err);
 			}
-			//TODO Add block to the post
-			res
-				.status(200)
-				.json({ success: true, block: block.populate("post"), errors: [] });
+			//Add block to the post
+			Post.findById(req.body.post, {}, {}, (err, post) => {
+				if (err) {
+					return next(err);
+				}
+				if (!post) {
+					const error = {
+						status: 404,
+						message: "NOT FOUND",
+					};
+					res
+						.status(404)
+						.json({ success: false, post: null, block, errors: [error] });
+					return next(error.status);
+				}
+				Block.find({ post: post._id }, {}, (err, blocks) => {
+					if (err) {
+						return next(err);
+					}
+
+					//All the IDs of the blocks including the new block
+					const blockIds = blocks.map((block) => block._id.valueOf());
+					console.log(blockIds);
+
+					//The content of the old post, it does not have the new block id
+					const oldContent = post.content.map((id) => id.valueOf());
+
+					//Filter out the id of the new block
+					const blockId = blockIds.filter(
+						(id) => oldContent.indexOf(id) === -1
+					)[0];
+					console.log(blockId);
+
+					//Push the id of the new block in the content of the post
+					post.content.push(blockId);
+
+					//Update the old post
+					post.update(post, {}, (err) => {
+						if (err) {
+							return next(err);
+						}
+
+						res.status(200).json({
+							success: true,
+							block: blocks[blocks.indexOf(blockId)],
+							errors: [],
+						});
+					});
+				});
+			});
 		});
 	},
 ];
