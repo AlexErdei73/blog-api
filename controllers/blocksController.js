@@ -1,6 +1,7 @@
 const Block = require("../models/block");
 const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
 function _updatePost(post, method, callback) {
   Post.findById(post, {}, {}, (err, post) => {
@@ -113,7 +114,21 @@ exports.blocks_post = [
 ];
 
 exports.block_get = function (req, res, next) {
-  res.send("NOT IMPLEMENTED");
+  const id = req.params.blockId;
+  Block.findOne({ _id: id }, (err, block) => {
+    if (err) {
+      return next(err);
+    }
+    if (!block) {
+      const error = {
+        status: 404,
+        message: "NOT FOUND",
+      };
+      res.status(404).json({ success: false, block: null, errors: [error] });
+      return next(error.status);
+    }
+    res.status(200).json({ success: true, block, errors: [] });
+  });
 };
 
 exports.block_put = function (req, res, next) {
