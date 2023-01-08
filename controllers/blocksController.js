@@ -3,14 +3,17 @@ const { body, validationResult } = require("express-validator");
 
 exports.blocks_post = [
 	body("post").trim().escape(),
-	body("type").if((value) => value !== "code"),
+	body("type")
+		.isIn(["subtitle", "paragraph", "code"])
+		.withMessage("Type must be subtitle, paragraph or code"),
 	//Do not validate the text of code blocks.
 	//It is a dangerous thing, make sure the code block never runs
 	//On the front end!!!
 	body("text")
-		.isAlphanumeric("en-US", { ignore: " '.!?" })
+		.if((req) => req.body.type !== "code")
+		.isAlphanumeric("en-US", { ignore: " '.!?," })
 		.withMessage(
-			"Text can only contain alphanumeric characters and punctuation"
+			"Text can only contain alphanumeric characters and for punctuation the '.!?, characters"
 		),
 	function (req, res, next) {
 		const errors = validationResult(req);
