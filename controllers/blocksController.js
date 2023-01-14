@@ -9,12 +9,7 @@ function _addPostContent(post, callback) {
       return;
     }
     if (!post) {
-      const error = {
-        status: 404,
-        message: "NOT FOUND",
-      };
-      callback(error, null);
-      return;
+      return next();
     }
     Block.find({ post: post._id }, (err, blocks) => {
       if (err) {
@@ -115,7 +110,6 @@ exports.blocks_post = [
             return next(err.status);
           }
         }
-        console.log(block);
         res.status(200).json({ success: true, block, errors: [] });
       });
     });
@@ -129,12 +123,7 @@ exports.block_get = function (req, res, next) {
       return next(err);
     }
     if (!block) {
-      const error = {
-        status: 404,
-        message: "NOT FOUND",
-      };
-      res.status(404).json({ success: false, block: null, errors: [error] });
-      return next(error.status);
+      return next();
     }
     res.status(200).json({ success: true, block, errors: [] });
   });
@@ -181,14 +170,7 @@ exports.block_put = [
           return next(err);
         }
         if (!updatedBlock) {
-          const error = {
-            status: 404,
-            message: "NOT FOUND",
-          };
-          res
-            .status(404)
-            .json({ success: false, block: null, errors: [error] });
-          return next(error.status);
+          return next();
         }
         res
           .status(200)
@@ -207,12 +189,7 @@ exports.block_delete = function (req, res, next) {
         return next(err);
       }
       if (!block) {
-        const error = {
-          status: 404,
-          message: "NOT FOUND",
-        };
-        res.status(404).json({ success: false, block: null, errors: [error] });
-        return next(error.status);
+        return next();
       }
       const author = block.post.author.valueOf();
       if (author !== req.user._id.valueOf() && !req.user.isAdmin()) {

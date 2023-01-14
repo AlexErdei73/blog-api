@@ -27,4 +27,11 @@ app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
 app.use("/posts/:id/blocks", blocksRouter);
 
+//Handle 404 status
+app.use((req, res, next) => {
+  res
+    .status(404)
+    .json({ success: false, errors: [{ status: 404, message: "NOT FOUND" }] });
+});
+
 module.exports = app;
