@@ -10,6 +10,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users")(passport); //We inject passport to the router module to protect some routes
 var postsRouter = require("./routes/posts")(passport);
 var blocksRouter = require("./routes/blocks")(passport);
+var commentsRouter = require("./routes/comments")(passport);
 
 var app = express();
 
@@ -26,6 +27,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
 app.use("/posts/:id/blocks", blocksRouter);
+app.use("/posts/:id/comments", commentsRouter);
 
 //Handle 404 status
 app.use((req, res, next) => {
