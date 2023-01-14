@@ -10,7 +10,7 @@ module.exports = (passport) => {
   router.post(
     "/",
     passport.authenticate("jwt", { session: false }),
-    commentsController.comment_post
+    commentsController.comments_post
   );
 
   router.put(
