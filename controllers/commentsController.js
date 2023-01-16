@@ -64,9 +64,54 @@ module.exports.comments_post = [
   },
 ];
 
-module.exports.comment_put = function (req, res, next) {
-  res.send("NOT IMPLEMENTED");
-};
+module.exports.comment_put = [
+  body("text")
+    .trim()
+    .isLength({ min: 1, message: "Comment cannot be empty" })
+    .isAlphanumeric("en-US", { ignore: " '.!?," })
+    .withMessage(
+      "Text can only contain alphanumeric characters and for punctuation the '.!?, characters"
+    ),
+  function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        success: false,
+        errors: errors.array(),
+        comment: {
+          text: req.body.text,
+        },
+      });
+      return;
+    }
+    Comment.findById(req.params.commentId, {}, {}, (err, comment) => {
+      if (err) {
+        return next(err);
+      }
+      if (!comment) {
+        return next();
+      }
+      if (
+        req.user._id.valueOf() !== comment.author.valueOf() &&
+        !req.user.isAdmin
+      ) {
+        res.status(403).json({
+          success: false,
+          errors: [{ status: 403, message: "Unauthorized" }],
+          comment,
+        });
+        return;
+      }
+      comment.text = req.body.text;
+      comment.save((err, comment) => {
+        if (err) {
+          return next(err);
+        }
+        res.status(200).json({ success: true, errors: [], comment });
+      });
+    });
+  },
+];
 
 module.exports.comment_delete = function (req, res, next) {
   res.send("NOT IMPLEMENTED");
