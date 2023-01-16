@@ -2,6 +2,30 @@ const Comment = require("../models/comment");
 const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
 
+function _removeCommentFromPost(postId, commentId, callback) {
+  Post.findById(postId, {}, {}, (err, post) => {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    if (!post) {
+      callback(null, null);
+      return;
+    }
+    const indexOfComment = post.comments
+      .map((id) => id.valueOf())
+      .indexOf(commentId);
+    post.comments.splice(indexOfComment, 1);
+    post.save((err) => {
+      if (err) {
+        callback(err, post);
+        return;
+      }
+      callback(null, post);
+    });
+  });
+}
+
 module.exports.comments_get = function (req, res, next) {
   res.send("NOT IMPLEMENTED");
 };
@@ -114,5 +138,39 @@ module.exports.comment_put = [
 ];
 
 module.exports.comment_delete = function (req, res, next) {
-  res.send("NOT IMPLEMENTED");
+  Comment.find({ _id: req.params.commentId }).exec((err, comments) => {
+    if (err) {
+      console.log(err);
+      return next(err);
+    }
+    if (comments.length === 0) {
+      return next();
+    }
+    const comment = comments[0];
+    if (
+      req.user._id.valueOf() !== comment.author.valueOf() &&
+      !req.user.isAdmin
+    ) {
+      res.status(403).json({
+        success: false,
+        errors: [{ status: 403, message: "Unauthorized" }],
+        comment,
+      });
+      return;
+    }
+    _removeCommentFromPost(comment.post, comment._id, (err, post) => {
+      if (err) {
+        return next(err);
+      }
+      if (!post) {
+        return next();
+      }
+      comment.remove((err, comment) => {
+        if (err) {
+          return next(err);
+        }
+        res.status(200).json({ success: true, errors: [], comment });
+      });
+    });
+  });
 };
