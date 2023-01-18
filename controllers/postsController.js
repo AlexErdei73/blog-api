@@ -1,5 +1,6 @@
 const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
 exports.posts_get = function (req, res, next) {
   Post.find({})
@@ -14,6 +15,7 @@ exports.posts_get = function (req, res, next) {
 };
 
 exports.blocks_get = function (req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
   Post.findById(req.params.id, {}, {}, (err, post) => {
     if (err) {
       return next(err);
@@ -70,6 +72,7 @@ exports.posts_post = [
 ];
 
 exports.post_get = function (req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
   Post.findOne({ _id: req.params.id })
     .populate({ path: "author", select: "-hash" }) //Do not make hash public
     .populate(["content", "comments", "likes"])
@@ -104,6 +107,7 @@ exports.post_put = [
       });
       return;
     }
+    if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
     Post.findById(req.params.id, {}, {}, (err, post) => {
       if (err) {
         return next(err);
@@ -143,6 +147,7 @@ exports.post_put = [
 ];
 
 exports.post_delete = function (req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
   //TODO Delete content
   //TODO Delete comments
   Post.findById(req.params.id, {}, {}, (err, post) => {

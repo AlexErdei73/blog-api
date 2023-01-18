@@ -63,7 +63,11 @@ function _removePostContent(block, callback) {
 }
 
 exports.blocks_post = [
-  body("post").trim().escape(),
+  body("post")
+    .trim()
+    .isLength({ min: 1, message: "Comment belongs to a post" })
+    .custom((value) => mongoose.isValidObjectId(value))
+    .withMessage("Post needs to be a valid mongo id"),
   body("type")
     .isIn(["subtitle", "paragraph", "code"])
     .withMessage("Type must be subtitle, paragraph or code"),
@@ -130,7 +134,11 @@ exports.block_get = function (req, res, next) {
 };
 
 exports.block_put = [
-  body("post").trim().escape(),
+  body("post")
+    .trim()
+    .isLength({ min: 1, message: "Comment belongs to a post" })
+    .custom((value) => mongoose.isValidObjectId(value))
+    .withMessage("Post needs to be a valid mongo id"),
   body("type")
     .isIn(["subtitle", "paragraph", "code"])
     .withMessage("Type must be subtitle, paragraph or code"),
@@ -157,6 +165,7 @@ exports.block_put = [
       });
       return;
     }
+    if (!mongoose.isValidObjectId(req.params.blockId)) return next(); //Avoid causing error by faulty mongo id
     Block.findByIdAndUpdate(
       req.params.blockId,
       {
@@ -181,6 +190,7 @@ exports.block_put = [
 ];
 
 exports.block_delete = function (req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.blockId)) return next(); //Avoid causing error by faulty mongo id
   const id = req.params.blockId;
   Block.findOne({ _id: id })
     .populate("post")

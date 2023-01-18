@@ -38,8 +38,9 @@ module.exports.comment_get = function (req, res, next) {
 module.exports.comments_post = [
   body("post")
     .trim()
-    .escape()
-    .isLength({ min: 1, message: "Comment belongs to a post" }),
+    .isLength({ min: 1, message: "Comment belongs to a post" })
+    .custom((value) => mongoose.isValidObjectId(value))
+    .withMessage("Post needs to be a valid mongo id"),
   body("text")
     .trim()
     .isLength({ min: 1, message: "Comment cannot be empty" })
@@ -109,6 +110,7 @@ module.exports.comment_put = [
       });
       return;
     }
+    if (!mongoose.isValidObjectId(req.params.commentId)) return next(); //Avoid causing error by faulty mongo id
     Comment.findById(req.params.commentId, {}, {}, (err, comment) => {
       if (err) {
         return next(err);
@@ -139,7 +141,7 @@ module.exports.comment_put = [
 ];
 
 module.exports.comment_delete = function (req, res, next) {
-  if (!mongoose.isValidObjectId(req.params.commentId)) return next();
+  if (!mongoose.isValidObjectId(req.params.commentId)) return next(); //Avoid causing error by faulty mongo id
   Comment.find({ _id: req.params.commentId }).exec((err, comments) => {
     if (err) {
       console.log(err);

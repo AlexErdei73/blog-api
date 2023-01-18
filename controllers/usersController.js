@@ -3,6 +3,7 @@ require("dotenv").config();
 const jsonwebtoken = require("jsonwebtoken");
 const User = require("../models/user");
 const { body, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
 function issueJWT(user) {
   const _id = user._id;
@@ -161,6 +162,7 @@ exports.users_id_put = [
         .json({ success: false, errors: errors.array(), user: req.body.user });
       return;
     }
+    if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
     const _id = req.params.id;
     if (_id !== req.user._id.valueOf()) {
       //User trying to update someone else' record
@@ -194,13 +196,13 @@ exports.users_id_put = [
 
 //Delete userby admin
 exports.users_id_delete = function (req, res, next) {
-  console.log(req.user);
   if (!req.user.isAdmin) {
     res
       .status(403)
       .json({ success: false, msg: "You are not allowed to delete users" });
     return;
   }
+  if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid error by faulty mongo id
   User.findByIdAndRemove(req.params.id, {}, (err, user) => {
     if (err) {
       return next(err);
