@@ -1,6 +1,7 @@
 const Comment = require("../models/comment");
 const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
 function _removeCommentFromPost(postId, commentId, callback) {
   Post.findById(postId, {}, {}, (err, post) => {
@@ -138,6 +139,7 @@ module.exports.comment_put = [
 ];
 
 module.exports.comment_delete = function (req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.commentId)) return next();
   Comment.find({ _id: req.params.commentId }).exec((err, comments) => {
     if (err) {
       console.log(err);

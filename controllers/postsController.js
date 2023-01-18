@@ -3,7 +3,8 @@ const { body, validationResult } = require("express-validator");
 
 exports.posts_get = function (req, res, next) {
   Post.find({})
-    //.populate(["content", "comments", "likes"])
+    .populate({ path: "author", select: "-hash" }) //Do not make hash public
+    .populate(["content", "comments", "likes"])
     .exec((err, posts) => {
       if (err) {
         return next(err);
@@ -70,8 +71,8 @@ exports.posts_post = [
 
 exports.post_get = function (req, res, next) {
   Post.findOne({ _id: req.params.id })
-    .populate("author")
-    //.populate(["content", "comments", "likes"])
+    .populate({ path: "author", select: "-hash" }) //Do not make hash public
+    .populate(["content", "comments", "likes"])
     .exec((err, post) => {
       if (err) {
         return next(err);
