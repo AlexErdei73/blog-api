@@ -11,6 +11,9 @@ router.get("/:id", postsController.post_get);
 /* GET posts/:id/blocks to get the content of the post */
 router.get("/:id/blocks", postsController.blocks_get);
 
+/* GET posts/:id/comments to get the comments of the post */
+router.get("/:id/comments", postsController.comments_get);
+
 module.exports = (passport) => {
   /* POST posts to add new post to database */
   router.post(

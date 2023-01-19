@@ -31,6 +31,28 @@ exports.blocks_get = function (req, res, next) {
   });
 };
 
+exports.comments_get = function (req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
+  Post.findById(req.params.id, {}, {}, (err, post) => {
+    if (err) {
+      return next(err);
+    }
+    if (!post) {
+      return next();
+    }
+    post.populate("comments", (err, post) => {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).json({
+        success: true,
+        comments: post.comments,
+        errors: [],
+      });
+    });
+  });
+};
+
 exports.posts_post = [
   body("title")
     .trim()

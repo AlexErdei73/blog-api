@@ -27,10 +27,6 @@ function _removeCommentFromPost(postId, commentId, callback) {
   });
 }
 
-module.exports.comments_get = function (req, res, next) {
-  res.send("NOT IMPLEMENTED");
-};
-
 module.exports.comment_get = function (req, res, next) {
   res.send("NOT IMPLEMENTED");
 };

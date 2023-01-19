@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const commentsController = require("../controllers/commentsController");
 
-router.get("/", commentsController.comments_get);
-
 router.get("/:commentId", commentsController.comment_get);
 
 module.exports = (passport) => {
