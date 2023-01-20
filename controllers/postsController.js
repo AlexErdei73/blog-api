@@ -1,6 +1,36 @@
 const Post = require("../models/post");
+const Block = require("../models/block");
 const { body, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
+const async = require("async");
+
+function _removeBlock(id, callback) {
+  Block.findByIdAndRemove(id, {}, (err, block) => {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    callback(null, block);
+  });
+}
+
+function _removeBlocks(blockIds, callback) {
+  async.parallel(
+    blockIds.map(
+      (id) =>
+        function (cb) {
+          _removeBlock(id, cb);
+        }
+    ),
+    (err) => {
+      if (err) {
+        callback(err);
+        return;
+      }
+      callback(null);
+    }
+  );
+}
 
 exports.posts_get = function (req, res, next) {
   Post.find({})
@@ -170,7 +200,6 @@ exports.post_put = [
 
 exports.post_delete = function (req, res, next) {
   if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
-  //TODO Delete content
   //TODO Delete comments
   Post.findById(req.params.id, {}, {}, (err, post) => {
     if (err) {
@@ -184,11 +213,18 @@ exports.post_delete = function (req, res, next) {
       res.status(403).json({ success: false, user, post, errors: [error] });
       return;
     }
-    post.remove((err, post) => {
+    _removeBlocks(post.content, (err) => {
       if (err) {
         return next(err);
       }
-      res.status(200).json({ success: true, user: req.user, post, errors: [] });
+      post.remove((err, post) => {
+        if (err) {
+          return next(err);
+        }
+        res
+          .status(200)
+          .json({ success: true, user: req.user, post, errors: [] });
+      });
     });
   });
 };
