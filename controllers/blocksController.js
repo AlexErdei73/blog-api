@@ -1,6 +1,7 @@
 const Block = require("../models/block");
 const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
 function _addPostContent(post, callback) {
   Post.findById(post, {}, {}, (err, post) => {
@@ -9,7 +10,9 @@ function _addPostContent(post, callback) {
       return;
     }
     if (!post) {
-      return next();
+      // No post found
+      callback(null, null);
+      return;
     }
     Block.find({ post: post._id }, (err, blocks) => {
       if (err) {
@@ -105,14 +108,23 @@ exports.blocks_post = [
       }
       //Add block to the post
       _addPostContent(req.body.post, (err, block) => {
-        if (err) {
-          if (!err.status) return next(err);
-          else {
-            res
-              .status(err.status)
-              .json({ success: false, block, errors: [err] });
-            return next(err.status);
-          }
+        if (err || !block) {
+          //Remove the new block, because it has not been added to the post
+          newBlock.remove((error, newBlock) => {
+            if (error) {
+              return next(error);
+            }
+            // Post was not found
+            if (!block) return next();
+            if (!err.status) return next(err);
+            else {
+              res
+                .status(err.status)
+                .json({ success: false, block: newBlock, errors: [err] });
+              return next(err.status);
+            }
+          });
+          return;
         }
         res.status(200).json({ success: true, block, errors: [] });
       });
