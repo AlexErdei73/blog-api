@@ -1,11 +1,12 @@
 const Post = require("../models/post");
 const Block = require("../models/block");
+const Comment = require("../models/comment");
 const { body, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 const async = require("async");
 
-function _removeBlock(id, callback) {
-  Block.findByIdAndRemove(id, {}, (err, block) => {
+function _removeElement(id, Model, callback) {
+  Model.findByIdAndRemove(id, {}, (err, block) => {
     if (err) {
       callback(err, null);
       return;
@@ -14,12 +15,12 @@ function _removeBlock(id, callback) {
   });
 }
 
-function _removeBlocks(blockIds, callback) {
+function _removeElements(ids, Model, callback) {
   async.parallel(
-    blockIds.map(
+    ids.map(
       (id) =>
         function (cb) {
-          _removeBlock(id, cb);
+          _removeElement(id, Model, cb);
         }
     ),
     (err) => {
@@ -200,7 +201,6 @@ exports.post_put = [
 
 exports.post_delete = function (req, res, next) {
   if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
-  //TODO Delete comments
   Post.findById(req.params.id, {}, {}, (err, post) => {
     if (err) {
       return next(err);
@@ -213,17 +213,22 @@ exports.post_delete = function (req, res, next) {
       res.status(403).json({ success: false, user, post, errors: [error] });
       return;
     }
-    _removeBlocks(post.content, (err) => {
+    _removeElements(post.content, Block, (err) => {
       if (err) {
         return next(err);
       }
-      post.remove((err, post) => {
+      _removeElements(post.comments, Comment, (err) => {
         if (err) {
           return next(err);
         }
-        res
-          .status(200)
-          .json({ success: true, user: req.user, post, errors: [] });
+        post.remove((err, post) => {
+          if (err) {
+            return next(err);
+          }
+          res
+            .status(200)
+            .json({ success: true, user: req.user, post, errors: [] });
+        });
       });
     });
   });

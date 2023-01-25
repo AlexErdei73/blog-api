@@ -116,6 +116,7 @@ exports.blocks_post = [
             }
             // Post was not found
             if (!block) return next();
+            // Error happened
             if (!err.status) return next(err);
             else {
               res
