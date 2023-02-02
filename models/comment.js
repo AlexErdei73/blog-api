@@ -14,6 +14,15 @@ const CommentSchema = new Schema(
       required: [true, "Comment belongs to a post"],
     },
     text: String,
+    links: {
+      type: [
+        {
+          url: String,
+          description: String,
+          position: Number,
+        },
+      ],
+    },
   },
   { timestamps: true }
 );
