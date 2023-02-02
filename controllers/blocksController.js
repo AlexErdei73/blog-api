@@ -83,6 +83,9 @@ exports.blocks_post = [
     .withMessage(
       "Text can only contain alphanumeric characters and for punctuation the '.!?, characters"
     ),
+  body("links.*.url").isURL(),
+  body("links.*.description").trim().isAlphanumeric("en-US", { ignore: " " }),
+  body("links.*.position").isInt(),
   function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -93,6 +96,7 @@ exports.blocks_post = [
           post: req.body.post,
           type: req.body.type,
           text: req.body.text,
+          links: req.body.links,
         },
       });
       return;
@@ -101,6 +105,7 @@ exports.blocks_post = [
       post: req.body.post,
       type: req.body.type,
       text: req.body.text,
+      links: req.body.links,
     });
     newBlock.save((err) => {
       if (err) {
@@ -164,6 +169,12 @@ exports.block_put = [
     .withMessage(
       "Text can only contain alphanumeric characters and for punctuation the '.!?, characters"
     ),
+  body("links.*.url").isURL(),
+  body("links.*.description").trim().isAlphanumeric("en-US", { ignore: " " }),
+  body("links.*.url").isURL(),
+  body("links.*.description").trim().isAlphanumeric("en-US", { ignore: " " }),
+  body("links.*.position").isInt(),
+  body("links.*.position").isInt(),
   function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -174,6 +185,7 @@ exports.block_put = [
           post: req.body.post,
           type: req.body.type,
           text: req.body.text,
+          links: req.body.links,
         },
       });
       return;
@@ -185,6 +197,7 @@ exports.block_put = [
         post: req.body.post,
         type: req.body.type,
         text: req.body.text,
+        links: req.body.links,
       },
       { returnDocument: "after" },
       (err, updatedBlock) => {
