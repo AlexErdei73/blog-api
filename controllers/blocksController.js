@@ -171,9 +171,6 @@ exports.block_put = [
     ),
   body("links.*.url").isURL(),
   body("links.*.description").trim().isAlphanumeric("en-US", { ignore: " " }),
-  body("links.*.url").isURL(),
-  body("links.*.description").trim().isAlphanumeric("en-US", { ignore: " " }),
-  body("links.*.position").isInt(),
   body("links.*.position").isInt(),
   function (req, res, next) {
     const errors = validationResult(req);
