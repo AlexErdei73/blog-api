@@ -44,17 +44,19 @@ exports.users_post = [
     .isLength({ min: 1 })
     .withMessage("Username is required")
     .isAlphanumeric()
-    .withMessage("Username can contain oly alphanumeric characters"),
+    .withMessage("Username can contain only alphanumeric characters"),
   body("name")
     .trim()
     .optional({ checkFalsy: true })
-    .isAlphanumeric()
-    .withMessage("Name can only contain alphanumeric characters"),
+    .isAlphanumeric("en-US", { ignore: " " })
+    .withMessage("Name can only contain alphanumeric characters and space"),
   body("jobTitle")
     .trim()
     .optional({ checkFalsy: true })
-    .isAlphanumeric()
-    .withMessage("Job title can only contain alphanumeric characters"),
+    .isAlphanumeric("en-US", { ignore: " " })
+    .withMessage(
+      "Job title can only contain alphanumeric characters and space"
+    ),
   body("bio")
     .trim()
     .optional({ checkFalsy: true })
@@ -137,17 +139,19 @@ exports.users_id_put = [
     .isLength({ min: 1 })
     .withMessage("Username is required")
     .isAlphanumeric()
-    .withMessage("Username can contain oly alphanumeric characters"),
+    .withMessage("Username can contain only alphanumeric characters"),
   body("name")
     .trim()
     .optional({ checkFalsy: true })
-    .isAlphanumeric()
-    .withMessage("Name can only contain alphanumeric characters"),
+    .isAlphanumeric("en-US", { ignore: " " })
+    .withMessage("Name can only contain alphanumeric characters and space"),
   body("jobTitle")
     .trim()
     .optional({ checkFalsy: true })
-    .isAlphanumeric()
-    .withMessage("Job title can only contain alphanumeric characters"),
+    .isAlphanumeric("en-US", { ignore: " " })
+    .withMessage(
+      "Job title can only contain alphanumeric characters and space"
+    ),
   body("bio")
     .trim()
     .optional({ checkFalsy: true })
