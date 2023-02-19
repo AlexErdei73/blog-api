@@ -5,6 +5,7 @@ var logger = require("morgan");
 var passport = require("passport");
 var configAuth = require("./config/auth");
 require("./config/database");
+var cors = require("cors");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users")(passport); //We inject passport to the router module to protect some routes
@@ -22,6 +23,8 @@ app.use(express.static(path.join(__dirname, "public")));
 
 configAuth(passport);
 app.use(passport.initialize());
+
+app.use(cors());
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
