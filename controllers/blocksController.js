@@ -90,9 +90,9 @@ exports.blocks_post = [
   //On the front end!!!
   body("text")
     .if((value, { req }) => req.body.type !== "code")
-    .isAlphanumeric("en-US", { ignore: " '.!?," })
+    .isAlphanumeric("en-US", { ignore: " '.!?,-()" })
     .withMessage(
-      "Text can only contain alphanumeric characters and for punctuation the '.!?, characters"
+      "Text can only contain alphanumeric characters and for punctuation the '.!?,-() characters"
     ),
   body("links.*.url").isURL(),
   body("links.*.description").trim().isAlphanumeric("en-US", { ignore: " " }),
@@ -189,9 +189,9 @@ exports.block_put = [
   //On the front end!!!
   body("text")
     .if((value, { req }) => req.body.type !== "code")
-    .isAlphanumeric("en-US", { ignore: " '.!?," })
+    .isAlphanumeric("en-US", { ignore: " '.!?,-()" })
     .withMessage(
-      "Text can only contain alphanumeric characters and for punctuation the '.!?, characters"
+      "Text can only contain alphanumeric characters and for punctuation the '.!?,-() characters"
     ),
   body("links.*.url").isURL(),
   body("links.*.description").trim().isAlphanumeric("en-US", { ignore: " " }),
