@@ -77,7 +77,9 @@ exports.users_post = [
       }
       if (user) {
         const err = new Error("Username already used");
-        res.status(409).json({ success: false, msg: err.message });
+        res
+          .status(409)
+          .json({ success: false, user, errors: [{ msg: err.message }] });
       } else
         bcrypt.hash(req.body.password, 10, (err, hash) => {
           if (err) {
