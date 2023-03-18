@@ -37,7 +37,7 @@ function _removeElements(ids, Model, callback) {
 exports.posts_get = function (req, res, next) {
   Post.find({})
     .populate({ path: "author", select: "-hash" }) //Do not make hash public
-    .populate(["content", "comments", "likes"])
+    .populate(["content", "comments"])
     .exec((err, posts) => {
       if (err) {
         return next(err);
@@ -129,7 +129,7 @@ exports.post_get = function (req, res, next) {
   if (!mongoose.isValidObjectId(req.params.id)) return next(); //Avoid causing error by faulty mongo id
   Post.findOne({ _id: req.params.id })
     .populate({ path: "author", select: "-hash" }) //Do not make hash public
-    .populate(["content", "comments", "likes"])
+    .populate(["content", "comments"])
     .exec((err, post) => {
       if (err) {
         return next(err);
